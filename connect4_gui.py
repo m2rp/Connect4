@@ -222,14 +222,15 @@ def initialize_board(canvas,ROWS,COLS):
 def convert_grid_to_logical_position(grid_position):
         global ROWS,COLS
         grid_position = np.array(grid_position)
-        grid_position[0] = grid_position[0] // (size_of_board / ROWS)
-        grid_position[1] = grid_position[1] // (size_of_board / COLS)
+        grid_position[1] = grid_position[1] // (size_of_board / ROWS)
+        grid_position[0] = grid_position[0] // (size_of_board / COLS)
         return np.array(grid_position, dtype=int)
 
 def click(event):
     
     grid_position = [event.x, event.y]
     logical_position = convert_grid_to_logical_position(grid_position)
+    print(logical_position)
 
 
 def menu():
@@ -237,6 +238,13 @@ def menu():
     COLS = 7
     print("Lets play Connect4!")
     ROWS = int(input("How many rows would you like in the board?\n"))
+   
+    board = np.zeros((ROWS,COLS),dtype=int) #Create board
+    display_board(board)
+    comp = int(input("Enter 0 for human, 1 for computer\n"))
+    if comp:
+        print("Computer playing as player 2")
+        level = int(input("What difficulty level would you like? (1 or 2)\n"))
     #GUI
     window = Tk()
     window.title('Connect4')
@@ -245,12 +253,6 @@ def menu():
     initialize_board(canvas,ROWS,COLS)
     window.bind('<Button-1>', click)
 
-    board = np.zeros((ROWS,COLS),dtype=int) #Create board
-    display_board(board)
-    comp = int(input("Enter 0 for human, 1 for computer\n"))
-    if comp:
-        print("Computer playing as player 2")
-        level = int(input("What difficulty level would you like? (1 or 2)\n"))
     turn = 1 #Default to player 1 first
     while check_victory(board,turn) == 0 and check_draw(board) == False:
         if comp and turn == 2: #Comp move
