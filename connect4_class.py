@@ -91,7 +91,7 @@ def check_move(board, turn, col, pop,com=0):
             return False#Check if bottom row disc in col is same as player       
     else:
         if board[0][col] != 0: #Column is already full -> Cant place a disc here
-            if com==0: print("Can't place disc here")
+            if com==0: print("Columns is already full. Please pick a differnt column")
             return False
     return True
 
@@ -111,15 +111,36 @@ def apply_move(board, turn, col, pop):
     
     return board
 
+def check_victory(board, who_played):
+    board = np_convert(board)
+    R,C = board.shape
+    p1 = False
+    p2 = False
+    for row in range(R-1,-1,-1):
+        for col in range(C):
+            if board[row][col]:
+                if p1 == False: #Only check victory condition for player 1 if p1 victory not found yet
+                    p1 = check_around(board,row,col,1)
+                if p2 == False: #Only check victory condition for player 2 if p2 victory not found yet
+                    p2 = check_around(board,row,col,2)
+                if p1 and p2: #If both conditions found, other player wins (from rules)
+                    if who_played == 1:
+                        print("Player 2 has won") 
+                        return 2 
+                    else:
+                        print("Player 1 has won")
+                        return 1
+    
+    if p1: 
+        print("Player 1 has won")
+        return 1 
+    if p2: 
+        print("Player 2 has won")
+        return 2
+    return 0
 
-def random_move(board,turn):
 
-    col,pop = random.randint(0,6),random.randint(0,4)
-    while(check_move(board,turn,col,pop,com=1)==False): #Make sure to generate a valid random move
-        col,pop = random.randint(0,6),random.randint(0,9)
-        if pop>1:pop=0 #10% chance of popping the disc
-        print("Doing random move") 
-    apply_move(board,turn,col,pop) #Make the move
+
     
    
  
@@ -134,10 +155,10 @@ class Connect4:
             self.level = int(input("What difficulty level would you like? (1 or 2)\n"))
         self.display_board()
         self.turn = 1 #Default to player 1 first
-        self.play()
+        
 
     def play(self):
-        while self.check_victory() == 0 and self.check_draw() == False:
+        while check_victory(self.board,self.turn) == 0 and self.check_draw() == False:
             if self.player and self.turn == 2: #Comp move
                 print("Computer move:")
                 self.turn = self.computer_move()
@@ -150,36 +171,36 @@ class Connect4:
     def computer_move(self):
         # implement your function here
         if self.level ==1 :
-            random_move(self.board,self.turn)
+            self.random_move()
         elif self.level ==2:
             board_future  = self.board.copy()
-            for col in range(self.cols):
+            for col in range(self.cols): #Check for possible winning moves by computer
                 board_future  = self.board.copy() #Create a copy of board to try sample move without pop
-                if check_move(board_future,turn,col,pop=False,com=1): #Check valid move
-                    apply_move(board_future,turn,col,pop=False) #Try move
-                    if self.check_victory() == 2: #If won
-                        apply_move(board,turn,col,pop=False) #Do that move
-                        display_board(board)  
+                if check_move(board_future,self.turn,col,pop=False,com=1): #Check valid move
+                    apply_move(board_future,self.turn,col,pop=False) #Try move
+                    if check_victory(board_future,self.turn) == 2: #If computer wins
+                        apply_move(self.board,self.turn,col,pop=False) #Do that move to actual board
+                        self.display_board()  
                         return 1
-                board_future  = board.copy() #Create a copy of board to try sample move with pop
-                if check_move(board_future,turn,col,pop=True,com=1): #Check valid move
-                    apply_move(board_future,turn,col,pop=True) #Try move
-                    if check_victory(board_future,turn) == 2: #If won
-                        apply_move(board,turn,col,pop=True) #Do that move
-                        display_board(board) 
+                board_future  = self.board.copy() #Create a copy of board to try sample move with pop
+                if check_move(board_future,self.turn,col,pop=True,com=1): #Check valid move
+                    apply_move(board_future,self.turn,col,pop=True) #Try move
+                    if check_victory(board_future,self.turn) == 2: #If won
+                        apply_move(self.board,self.turn,col,pop=True) #Do that move
+                        self.display_board() 
                         return 1
-            for col in range(C):
-                board_future  = board.copy() #Look for adverse move
+            for col in range(self.cols): #Check for possible winning moves by opponent(1)
+                board_future  = self.board.copy() #Look for adverse move
                 if check_move(board_future,1,col,pop=False,com=1): #Check valid move
                     apply_move(board_future,1,col,pop=False) #Try move
                     if check_victory(board_future,1) == 1: #If adverse wins
-                        apply_move(board,turn,col,pop=False) #Do that move
-                        display_board(board) 
+                        apply_move(self.board,self.turn,col,pop=False) #Do that move
+                        self.display_board() 
                         return 1
 
-            random_move(board,turn) #Else do a random move
-        display_board(board)     
-    return 1
+            self.random_move() #Else do a random move
+        self.display_board()     
+        return 1
 
     
     def player_move(self):
@@ -190,10 +211,21 @@ class Connect4:
         
         if check_move(self.board,self.turn,col,pop): #Check if valid move
             apply_move(self.board,self.turn,col,pop) #Make the move
-            turn = 2 if turn == 1 else 1 #Change player to play
-            self.display_board() 
-        return turn 
-        
+            self.display_board()
+            return 2 if self.turn == 1 else 1 #Change player to play
+        else:
+            return self.turn
+
+    def random_move(self):
+
+        col,pop = random.randint(0,6),random.randint(0,9)
+        if pop>1:pop=0 #10% chance of popping the disc
+        while(check_move(self.board,self.turn,col,pop,com=1)==False): #Make sure to generate a valid random move
+            col,pop = random.randint(0,6),random.randint(0,9)
+            if pop>1:pop=0 #10% chance of popping the disc
+            print("Doing random move") 
+        apply_move(self.board,self.turn,col,pop) #Make the move
+
     def check_draw(self):
         for c in self.board[0]:
             if c ==0: #If there is an avaialble slot game has not ended
@@ -201,32 +233,7 @@ class Connect4:
         print("Match drawn")
         return True
     
-    def check_victory(self):
-    #self.board = np_convert(self.board)
-        p1 = False
-        p2 = False
-        for row in range(self.rows-1,-1,-1):
-            for col in range(self.cols):
-                if self.board[row][col]:
-                    if p1 == False: #Only check victory condition for player 1 if p1 victory not found yet
-                        p1 = check_around(self.board,row,col,1)
-                    if p2 == False: #Only check victory condition for player 2 if p2 victory not found yet
-                        p2 = check_around(self.board,row,col,2)
-                    if p1 and p2: #If both conditions found, other player wins (from rules)
-                        if self.turn == 1:
-                            print("Player 2 has won") 
-                            return 2 
-                        else:
-                            print("Player 1 has won")
-                            return 1
-        
-        if p1: 
-            print("Player 1 has won")
-            return 1 
-        if p2: 
-            print("Player 2 has won")
-            return 2
-        return 0
+
     def display_board(self):
         print(self.board)
 
@@ -237,8 +244,7 @@ def menu():
     ROWS = int(input("How many rows would you like in the board?\n"))
     player = int(input("Enter 0 for human, 1 for computer\n"))
     connect4 = Connect4(ROWS,COLS,player)
-    #put into class
-   
+    connect4.play()
 
    
 if __name__ == "__main__":
