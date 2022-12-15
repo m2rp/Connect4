@@ -1,6 +1,7 @@
 import random
 import math
 import numpy as np
+from tkinter import *
 
 def check_index(board,row,col):
     R,C = board.shape
@@ -155,7 +156,50 @@ class Connect4:
             self.level = int(input("What difficulty level would you like? (1 or 2)\n"))
         self.display_board()
         self.turn = 1 #Default to player 1 first
+        self.startGUI()
+    
+    def startGUI(self):
         
+        self.window = Tk()
+        self.window.title('Connect4')
+        self.size_of_board = 600
+        self.canvas = Canvas(self.window, width=self.size_of_board, height=self.size_of_board)
+        #self.canvas.pack()
+        #self.initialize_board()
+        #self.window.bind('<Button-1>', self.click)
+        Msg ='Would you like to play against human or computer?'
+        messageVar = Message(self.window, text = Msg,aspect = 1400)
+        messageVar.config(bg='lightblue', font='30px')
+        messageVar.grid(row=0, column=0)
+        
+        human_btn = Button(self.window, text='Human', width=30,
+        height=5, bd='10', command=self.window.destroy)
+        comp_btn = Button(self.window, text='Computer', width=30,
+        height=5, bd='10', command=self.window.destroy)
+        #btn.place(x=65, y=100)
+        human_btn.grid(row=2, column=0)
+        comp_btn.grid(row=2, column=1)
+    
+    def click(self,event):
+    
+        grid_position = [event.x, event.y]
+        logical_position = self.convert_grid_to_logical_position(grid_position)
+        print(logical_position)
+        
+
+    def convert_grid_to_logical_position(self,grid_position):
+        grid_position = np.array(grid_position)
+        grid_position[1] = grid_position[1] // (self.size_of_board / self.rows)
+        grid_position[0] = grid_position[0] // (self.size_of_board / self.cols)
+        return np.array(grid_position, dtype=int)
+   
+    def initialize_board(self):
+    
+        for i in range(self.cols-1):
+            self.canvas.create_line((i + 1) * self.size_of_board / self.cols, 0, (i + 1) * self.size_of_board / self.cols, self.size_of_board)
+
+        for i in range(self.rows-1):
+            self.canvas.create_line(0, (i + 1) * self.size_of_board / self.rows, self.size_of_board, (i + 1) * self.size_of_board / self.rows)
 
     def play(self):
         while check_victory(self.board,self.turn) == 0 and self.check_draw() == False:
