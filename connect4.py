@@ -222,7 +222,7 @@ class Connect4:
   
         
     def drawCircle(self,row,col): #Draw circle to represent player move
-        x,y = row*self.size_of_board//self.rows + 5, col*self.size_of_board//self.cols + 5
+        y,x = row*self.size_of_board//self.rows + 5, col*self.size_of_board//self.cols + 5
         
         self.canvas.create_oval(x,y,x+self.circle_size,y+self.circle_size,outline = "black",fill = self.colour,width = 2)
 
@@ -252,7 +252,7 @@ class Connect4:
         grid_position = [event.x, event.y]
         row,col = self.convert_grid_to_logical_position(grid_position)
         print(row,col)
-        self.player_move(row,col)
+        self.player_move(col,row)
         self.play()
         #self.drawCircle(row,col)
         #self.nextPlayer()

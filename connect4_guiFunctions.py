@@ -63,7 +63,8 @@ class Gui1App:
         self.nextPlayer()
         
     def drawCircle(self,row,col): #Draw circle to represent player move
-        x,y = row*self.size_of_board//self.rows + 5, col*self.size_of_board//self.cols + 5
+        x,y = row*self.size_of_board//self.cols + 5, col*self.size_of_board//self.rows + 5
+        print("drawing at ",x,y)
         self.canvas.create_oval(x,y,x+self.circle_size,y+self.circle_size,outline = "black",fill = self.colour,width = 2)
 
     def nextPlayer(self): #CHange player turn and colours
