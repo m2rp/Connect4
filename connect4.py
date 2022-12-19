@@ -133,10 +133,10 @@ def check_victory(board, who_played):
                     p2 = check_around(board,row,col,2)
                 if p1 and p2: #If both conditions found, other player wins (from rules)
                     if who_played == 1:
-                        print("Player 2 has won") 
+                        print("Player 2 has won after pop") 
                         return 2 
                     else:
-                        print("Player 1 has won")
+                        print("Player 1 has won after pop")
                         return 1
     
     if p1: 
@@ -158,7 +158,7 @@ class Connect4:
         self.rows = 7 #To be input from user
         self.cols = COLS 
         self.turn = 1 #Default to player 1 first
-        self.colour = '#0000ff' #blue
+        self.colour = ['Empty','#0000ff','#ff0000'] #blue,red
         self.size_of_board = 600
         self.circle_size = self.size_of_board//min(self.rows,self.cols) - 10
         self.whoIsPlaying = None # 0 is human, 1 is computer
@@ -189,7 +189,7 @@ class Connect4:
         self.whoIsPlaying = 0 #0 for human, 1 for computer
         self.initBoard() 
         
-    def comp_button_click(self):
+    def comp_button_click(self):  
         print("Computer button clicked")
         self.mainwindow.destroy()
         self.whoIsPlaying = 1 #0 for human, 1 for computer
@@ -209,34 +209,30 @@ class Connect4:
     def initBoard(self):
         #Internal board (np array)
         self.board = np.zeros((self.rows,self.cols),dtype=int) #Create board
-        self.display_board()
        #GUI board 
         self.builder = self.initBuilder("3") 
         self.canvas = self.builder.get_object("canvas2")
-        
+        self.display_board()
+    def drawLines(self):
         for i in range(self.rows):
             self.canvas.create_line(0, (i + 1) * self.size_of_board / self.rows, self.size_of_board, (i + 1) * self.size_of_board / self.rows)
         for i in range(self.cols-1):
             self.canvas.create_line((i + 1) * self.size_of_board / self.cols, 0, (i + 1) * self.size_of_board / self.cols, self.size_of_board)
-        self.play()
-
   
         
-    def drawCircle(self,row,col): #Draw circle to represent player move
+    def drawCircle(self,row,col,colourIndex): #Draw circle to represent player move
         y,x = row*self.size_of_board//self.rows + 5, col*self.size_of_board//self.cols + 5
-        self.canvas.create_oval(x,y,x+self.circle_size,y+self.circle_size,outline = "black",fill = self.colour,width = 2)
+        self.canvas.create_oval(x,y,x+self.circle_size,y+self.circle_size,outline = "black",fill = self.colour[colourIndex],width = 2)
        
 
     def nextPlayer(self): #CHange player turn and colours
         if self.turn == 1:
             self.turn = 2
-            self.colour = '#ff0000' #player 2 is red
         else:
             self.turn = 1
-            self.colour =  '#0000ff' #player 1 is blue
         self.display = self.builder.get_object("message1")
         self.message = self.builder.get_variable("turn")
-        self.display['foreground'] = self.colour
+        self.display['foreground'] = self.colour[self.turn]
         self.message.set(f"Player {self.turn} to play")
 
     def convert_grid_to_logical_position(self,grid_position):
@@ -254,7 +250,10 @@ class Connect4:
         row,col = self.convert_grid_to_logical_position(grid_position)
         print(row,col)
         self.player_move(col,row)
-        self.play()
+        self.checkEnd()
+        if self.whoIsPlaying and self.turn == 2: #Comp move
+                print("Computer move:")
+                self.computer_move()
 
         
     def player_move(self,row,col):
@@ -262,7 +261,7 @@ class Connect4:
         pop = 0
         if check_move(self.board,self.turn,col,pop): #Check if valid move
             row,col = apply_move(self.board,self.turn,col,pop) #Make the move
-            self.drawCircle(row,col)
+            #self.drawCircle(row,col)
             self.display_board()
             self.nextPlayer()
             self.mainwindow.update()
@@ -271,18 +270,23 @@ class Connect4:
             return 
 
 
-    def play(self):
+    def checkEnd(self):
         #print("Starting play")
-        if check_victory(self.board,self.turn) == 0 and self.check_draw() == False:
-            if self.whoIsPlaying and self.turn == 2: #Comp move
-                print("Computer move:")
-                self.computer_move()
-            else: #Human Move
-                pass
-
-        else:
+        self.win = check_victory(self.board,self.turn)
+        if self.win != 0 or self.check_draw():
             self.mainwindow.destroy()
-            print("Thanks for playing Connect4!")
+            self.EndGame()
+
+    def EndGame(self):
+        print("Thanks for playing Connect4!")
+        self.builder = self.initBuilder("6")
+        self.label = self.builder.get_variable("whoWon")
+        self.label.set(f"Player {self.win} has won")
+    def play_again(self):
+        self.mainwindow.destroy()
+        Connect4()
+    def no_play_again(self):
+        self.mainwindow.destroy()
     
     def computer_move(self):
         time.sleep(0.5)        
@@ -296,9 +300,8 @@ class Connect4:
                     apply_move(board_future,self.turn,col,pop=False) #Try move
                     if check_victory(board_future,self.turn) == 2: #If computer wins
                         row,col = apply_move(self.board,self.turn,col,pop=False) #Do that move to actual board
-                        self.drawCircle(row,col) 
-                        self.display_board()  
-                        return 1
+                        #self.drawCircle(row,col) 
+                        break 
                 """ 
                #Implement when pop
                 board_future  = self.board.copy() #Create a copy of board to try sample move with pop
@@ -308,26 +311,23 @@ class Connect4:
                         row,col = apply_move(self.board,self.turn,col,pop=True) #Do that move
                         self.drawCircle(row,col)
                         self.display_board() 
-                        return 1
+                        return 
                 """
             for col in range(self.cols): #Check for possible winning moves by opponent(1)
                 board_future  = self.board.copy() #Look for adverse move
                 if check_move(board_future,1,col,pop=False,com=1): #Check valid move
                     apply_move(board_future,1,col,pop=False) #Try move
                     if check_victory(board_future,1) == 1: #If adverse wins
-                        row,col = apply_move(self.board,self.turn,col,pop=False) #Do that move
-                        self.drawCircle(row,col)
-                        self.display_board() 
-                        return 1
+                        row,col = apply_move(self.board,self.turn,col,pop=False) #Do that move to block
+                        #self.drawCircle(row,col)
+                        break
 
             self.random_move() #Else do a random move
         self.nextPlayer()
-        self.display_board()   
-        if check_victory(self.board,self.turn) == 0 and self.check_draw() == False:
-            return  
-        else:
-            self.mainwindow.destroy()
-            print("Thanks for playing Connect4!")
+        self.display_board()  
+        self.checkEnd() 
+        print("End of comp move")
+    
 
 
     def random_move(self):
@@ -339,7 +339,7 @@ class Connect4:
             if pop>1:pop=0 #10% chance of popping the disc
         print("Doing random move") 
         row,col = apply_move(self.board,self.turn,col,pop) #Make the move
-        self.drawCircle(row,col)
+        #self.drawCircle(row,col)
         
 
 
@@ -353,6 +353,12 @@ class Connect4:
 
     def display_board(self):
         print(self.board)
+        self.canvas.delete("all")
+        self.drawLines()
+        for row in range(self.rows):
+            for col in range(self.cols):
+                if self.board[row,col]>0:
+                    self.drawCircle(row,col,self.board[row,col])
 
 def menu():
 

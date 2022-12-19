@@ -161,22 +161,75 @@
     </child>
     <child>
       <object class="ttk.Frame" id="frame8">
-        <property name="height">50</property>
-        <property name="width">200</property>
+        <property name="height">60</property>
+        <property name="width">600</property>
         <layout manager="grid">
           <property name="column">0</property>
           <property name="row">2</property>
           <property name="sticky">ew</property>
         </layout>
         <child>
-          <object class="tk.Canvas" id="canvas3">
-            <property name="background">#858585</property>
-            <property name="height">50</property>
-            <property name="width">600</property>
-            <layout manager="grid">
-              <property name="column">0</property>
-              <property name="row">0</property>
-              <property name="sticky">ew</property>
+          <object class="ttk.Button" id="button1">
+            <property name="text" translatable="yes">button1</property>
+            <property name="width">13</property>
+            <layout manager="pack">
+              <property name="side">left</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="ttk.Button" id="button10">
+            <property name="text" translatable="yes">button1</property>
+            <property name="width">13</property>
+            <layout manager="pack">
+              <property name="side">left</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="ttk.Button" id="button11">
+            <property name="text" translatable="yes">button1</property>
+            <property name="width">13</property>
+            <layout manager="pack">
+              <property name="side">left</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="ttk.Button" id="button12">
+            <property name="text" translatable="yes">button1</property>
+            <property name="width">13</property>
+            <layout manager="pack">
+              <property name="side">left</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="ttk.Button" id="button13">
+            <property name="text" translatable="yes">button1</property>
+            <property name="width">13</property>
+            <layout manager="pack">
+              <property name="side">left</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="ttk.Button" id="button14">
+            <property name="text" translatable="yes">button1</property>
+            <property name="width">13</property>
+            <layout manager="pack">
+              <property name="fill">x</property>
+              <property name="side">left</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="ttk.Button" id="button15">
+            <property name="text" translatable="yes">button1</property>
+            <property name="width">13</property>
+            <layout manager="pack">
+              <property name="fill">x</property>
+              <property name="side">left</property>
             </layout>
           </object>
         </child>
@@ -253,6 +306,90 @@
               <property name="padx">0 50</property>
               <property name="row">1</property>
             </layout>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="tk.Toplevel" id="toplevel6">
+    <property name="height">200</property>
+    <property name="width">200</property>
+    <child>
+      <object class="ttk.Frame" id="frame4">
+        <property name="height">200</property>
+        <property name="width">200</property>
+        <layout manager="pack" />
+        <child>
+          <object class="ttk.Label" id="label4">
+            <property name="font">TkHeadingFont</property>
+            <property name="justify">left</property>
+            <property name="state">normal</property>
+            <property name="textvariable">string:whoWon</property>
+            <layout manager="grid">
+              <property name="column">0</property>
+              <property name="padx">15 15</property>
+              <property name="pady">10 0</property>
+              <property name="row">0</property>
+              <property name="sticky">ew</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="ttk.Frame" id="frame9" named="True">
+            <property name="height">200</property>
+            <property name="width">200</property>
+            <layout manager="grid">
+              <property name="column">0</property>
+              <property name="pady">0 10</property>
+              <property name="row">2</property>
+            </layout>
+            <child>
+              <object class="ttk.Button" id="button3" named="True">
+                <property name="command" type="command" cbtype="simple">play_again</property>
+                <property name="text" translatable="yes">Yes</property>
+                <layout manager="grid">
+                  <property name="column">0</property>
+                  <property name="row">0</property>
+                </layout>
+              </object>
+            </child>
+            <child>
+              <object class="ttk.Button" id="button4" named="True">
+                <property name="command" type="command" cbtype="simple">no_play_again</property>
+                <property name="text" translatable="yes">No</property>
+                <layout manager="grid">
+                  <property name="column">1</property>
+                  <property name="padx">10</property>
+                  <property name="row">0</property>
+                  <property name="sticky">ew</property>
+                </layout>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="ttk.Frame" id="frame11">
+            <property name="height">200</property>
+            <property name="width">200</property>
+            <layout manager="grid">
+              <property name="column">0</property>
+              <property name="row">1</property>
+            </layout>
+            <child>
+              <object class="ttk.Label" id="label5">
+                <property name="font">TkHeadingFont</property>
+                <property name="justify">left</property>
+                <property name="state">normal</property>
+                <property name="text" translatable="yes">Would you like to play again?</property>
+                <layout manager="grid">
+                  <property name="column">0</property>
+                  <property name="padx">15 15</property>
+                  <property name="pady">10 5</property>
+                  <property name="row">0</property>
+                  <property name="sticky">ew</property>
+                </layout>
+              </object>
+            </child>
           </object>
         </child>
       </object>
