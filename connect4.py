@@ -18,8 +18,10 @@ def check_index(board,row,col):
 
 def check_around(board,row,col,who): #Function to check vicotry status of a player at a given r,c
     win = True
+    #Check right
     for i in range(4): 
         if check_index(board,row,col+i):
+           # print("Checking  ", row, col+i, " with value ", board[row][col+i])
             if board[row][col+i] != who:
                 win = False
                 break
@@ -27,6 +29,7 @@ def check_around(board,row,col,who): #Function to check vicotry status of a play
             win = False
             break
     if win: 
+       # print("Won checking right")
         return win
     else: win = True
     #Check Up
@@ -39,6 +42,7 @@ def check_around(board,row,col,who): #Function to check vicotry status of a play
             win = False
             break
     if win: 
+       # print("Won checking up")
         return win
     else: win = True
 
@@ -52,6 +56,7 @@ def check_around(board,row,col,who): #Function to check vicotry status of a play
             win = False
             break
     if win: 
+        #print("Won checking up right")
         return win
     else: win = True
     #Check diag-up-left
@@ -63,6 +68,8 @@ def check_around(board,row,col,who): #Function to check vicotry status of a play
         else:
             win = False
             break
+            
+        #print("Won checking up left")       
     return win
 
  
@@ -106,6 +113,7 @@ def check_move(board, turn, col, pop,com=0):
 def apply_move(board, turn, col, pop):
     board = np_convert(board)
     R,C = board.shape
+    row = -1 
     #display_board(board)
     if pop:
         r = R-1
@@ -126,24 +134,23 @@ def check_victory(board, who_played):
     p2 = False
     for row in range(R-1,-1,-1):
         for col in range(C):
-            if board[row][col]:
-                if p1 == False: #Only check victory condition for player 1 if p1 victory not found yet
-                    p1 = check_around(board,row,col,1)
-                if p2 == False: #Only check victory condition for player 2 if p2 victory not found yet
-                    p2 = check_around(board,row,col,2)
-                if p1 and p2: #If both conditions found, other player wins (from rules)
-                    if who_played == 1:
-                        print("Player 2 has won after pop") 
-                        return 2 
-                    else:
-                        print("Player 1 has won after pop")
-                        return 1
+            if board[row][col] == 1 and p1 == False:
+                p1 = check_around(board,row,col,1)
+            if board[row][col] == 2 and p2 == False: #Only check victory condition for player 2 if p2 victory not found yet
+                p2 = check_around(board,row,col,2)
+            if p1 and p2: #If both conditions found, other player wins (from rules)
+                if who_played == 1:
+                    print("Player 2 has won after pop") 
+                    return 2 
+                else:
+                    print("Player 1 has won after pop")
+                    return 1
     
     if p1: 
-        print("Player 1 has won")
+        #print("Player 1 has won")
         return 1 
     if p2: 
-        print("Player 2 has won")
+        #print("Player 2 has won")
         return 2
     return 0
 
@@ -162,6 +169,7 @@ class Connect4:
         self.size_of_board = 600
         self.circle_size = self.size_of_board//min(self.rows,self.cols) - 10
         self.whoIsPlaying = None # 0 is human, 1 is computer
+        self.mainwindow = None
         self.builder = self.initBuilder("5")
         self.run()
          
@@ -173,6 +181,7 @@ class Connect4:
         builder.add_resource_path(PROJECT_PATH)
         builder.add_from_file(PROJECT_UI)
         # Main widget
+        self.previous = self.mainwindow #Store previous window for display purposes
         self.mainwindow = builder.get_object("toplevel"+windowNumber)
         builder.connect_callbacks(self)
         return builder
@@ -274,22 +283,25 @@ class Connect4:
         #print("Starting play")
         self.win = check_victory(self.board,self.turn)
         if self.win != 0 or self.check_draw():
-            self.mainwindow.destroy()
             self.EndGame()
 
     def EndGame(self):
+        print(f"Player {self.win} has won")
         print("Thanks for playing Connect4!")
         self.builder = self.initBuilder("6")
         self.label = self.builder.get_variable("whoWon")
         self.label.set(f"Player {self.win} has won")
     def play_again(self):
         self.mainwindow.destroy()
+        self.previous.destroy()
         Connect4()
     def no_play_again(self):
         self.mainwindow.destroy()
+        self.previous.destroy()
     
     def computer_move(self):
-        time.sleep(0.5)        
+        time.sleep(0.5)  
+        moved = False      
         if self.level == 1:
             self.random_move()
         elif self.level ==2:
@@ -300,6 +312,7 @@ class Connect4:
                     apply_move(board_future,self.turn,col,pop=False) #Try move
                     if check_victory(board_future,self.turn) == 2: #If computer wins
                         row,col = apply_move(self.board,self.turn,col,pop=False) #Do that move to actual board
+                        moved = True
                         #self.drawCircle(row,col) 
                         break 
                 """ 
@@ -317,12 +330,15 @@ class Connect4:
                 board_future  = self.board.copy() #Look for adverse move
                 if check_move(board_future,1,col,pop=False,com=1): #Check valid move
                     apply_move(board_future,1,col,pop=False) #Try move
-                    if check_victory(board_future,1) == 1: #If adverse wins
+                   
+                    if check_victory(board_future,1) == 1 and moved == False: #If adverse wins
                         row,col = apply_move(self.board,self.turn,col,pop=False) #Do that move to block
+                        moved = True
                         #self.drawCircle(row,col)
                         break
 
-            self.random_move() #Else do a random move
+            if moved == False:
+                self.random_move() #Else do a random move
         self.nextPlayer()
         self.display_board()  
         self.checkEnd() 
