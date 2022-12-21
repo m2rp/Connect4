@@ -76,7 +76,6 @@ def check_around(board,row,col,who): #Function to check vicotry status of a play
         #print("Won checking up left")       
     return win
 
- 
 def find_free_row(board,row,col):
     row -= 1
     while (row >=0):
@@ -96,7 +95,6 @@ def np_convert(board):
     return np.flip(board,0)
 
 def check_move(board, turn, col, pop,com=0):
-    board = np_convert(board)
     R,C = board.shape
     if col <0 or col >6: #col is out of range
         print("Invalid column")
@@ -114,7 +112,6 @@ def check_move(board, turn, col, pop,com=0):
     return True
 
 def apply_move(board, turn, col, pop):
-    board = np_convert(board)
     R,C = board.shape
     row = -1 
     #display_board(board)
@@ -130,7 +127,6 @@ def apply_move(board, turn, col, pop):
     return 
 
 def check_victory(board, who_played):
-    board = np_convert(board)
     R,C = board.shape
     p1 = False
     p2 = False
@@ -163,13 +159,12 @@ class Connect4:
         self.cols = COLS 
         self.turn = 1 #Default to player 1 first
         self.colour = ['Empty','#0000ff','#ff0000'] #blue,red
-        self.size_of_board = 600
-        self.circle_size = self.size_of_board//min(self.rows,self.cols) - 10
+        self.board_width = 600
+        self.circle_size = 600/7 - 10
         self.whoIsPlaying = None # 0 is human, 1 is computer
         self.mainwindow = None
         self.builder = self.initBuilder("5")
         self.run()
- 
     #GUI Functions --------------------------------
     def initBuilder(self,windowNumber):
         builder = pygubu.Builder()
@@ -180,12 +175,15 @@ class Connect4:
         self.mainwindow = builder.get_object("toplevel"+windowNumber)
         builder.connect_callbacks(self)
         return builder
+    
     def initBoard(self):
         #Internal board (np array)
         self.board = np.zeros((self.rows,self.cols),dtype=int) #Create board
        #GUI board 
         self.builder = self.initBuilder("3") 
         self.canvas = self.builder.get_object("canvas2")
+        self.board_height = self.canvas['height'] = self.rows*600/7
+        print(self.board_height)
         #self.canvas.bind("<1>", self.boardClick)
         self.display_board()
 
@@ -221,13 +219,13 @@ class Connect4:
   
     def drawLines(self):
         for i in range(self.rows):
-            self.canvas.create_line(0, (i + 1) * self.size_of_board / self.rows, self.size_of_board, (i + 1) * self.size_of_board / self.rows)
+            self.canvas.create_line(0, (i + 1) * self.board_height / self.rows, self.board_width, (i + 1) * self.board_height / self.rows)
         for i in range(self.cols-1):
-            self.canvas.create_line((i + 1) * self.size_of_board / self.cols, 0, (i + 1) * self.size_of_board / self.cols, self.size_of_board)
+            self.canvas.create_line((i + 1) * self.board_width / self.cols, 0, (i + 1) * self.board_width / self.cols, self.board_width)
   
         
     def drawCircle(self,row,col,colourIndex): #Draw circle to represent player move
-        y,x = row*self.size_of_board//self.rows + 5, col*self.size_of_board//self.cols + 5
+        y,x = row*self.board_height//self.rows + 5, col*self.board_width//self.cols + 5
         self.canvas.create_oval(x,y,x+self.circle_size,y+self.circle_size,outline = "black",fill = self.colour[colourIndex],width = 2)
     
     def run(self):
@@ -271,8 +269,8 @@ class Connect4:
     #Logical functions------------------------
     def convert_grid_to_logical_position(self,grid_position):
         grid_position = np.array(grid_position)
-        grid_position[1] = grid_position[1] // (self.size_of_board / self.rows)
-        grid_position[0] = grid_position[0] // (self.size_of_board / self.cols)
+        grid_position[1] = grid_position[1] // (self.board_height / self.rows)
+        grid_position[0] = grid_position[0] // (self.board_width / self.cols)
         return np.array(grid_position, dtype=int)
     
     def nextPlayer(self): #CHange player turn and colours
@@ -296,7 +294,6 @@ class Connect4:
     def pop(self,event):
         print("popping")
         pop_col = int(event[-1])
-        print(pop_col,type(pop_col))
         if check_move(self.board,self.turn,pop_col,pop=1): #Check if valid move
             apply_move(self.board,self.turn,pop_col,pop=1) #Make the move
             self.display_board()
